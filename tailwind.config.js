@@ -1,0 +1,87 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#FFB6B9',
+          50: '#FFF0F1',
+          100: '#FFE5E7',
+          200: '#FFD6D9',
+          300: '#FFC7CB',
+          400: '#FFB6B9',
+          500: '#FFB6B9',
+          600: '#FF9BA0',
+          700: '#FF8087',
+          800: '#FF656E',
+          900: '#FF4A55',
+        },
+        secondary: {
+          DEFAULT: '#FFF6E5',
+          50: '#FFFEF9',
+          100: '#FFFCF2',
+          200: '#FFF9E8',
+          300: '#FFF6E5',
+          400: '#FFF3D9',
+          500: '#FFF0CC',
+          600: '#FFEDBF',
+          700: '#FFEAB3',
+          800: '#FFE7A6',
+          900: '#FFE499',
+        },
+        accent: {
+          DEFAULT: '#A7D8F5',
+          50: '#F5FBFF',
+          100: '#E8F6FF',
+          200: '#D4EEFF',
+          300: '#C0E6FF',
+          400: '#A7D8F5',
+          500: '#A7D8F5',
+          600: '#7AC4F0',
+          700: '#4DB0EB',
+          800: '#209CE6',
+          900: '#1A7FB8',
+        },
+        neutral: {
+          DEFAULT: '#F4F4F6',
+          50: '#FFFFFF',
+          100: '#FAFAFA',
+          200: '#F7F7F9',
+          300: '#F4F4F6',
+          400: '#E8E8EC',
+          500: '#DCDCE2',
+          600: '#C8C8D0',
+          700: '#B4B4BE',
+          800: '#A0A0AC',
+          900: '#8C8C9A',
+        },
+        text: {
+          primary: '#333333',
+          secondary: '#666666',
+          light: '#999999',
+        },
+      },
+      fontFamily: {
+        heading: ['Poppins', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+      },
+      fontSize: {
+        base: '16px',
+        h1: '32px',
+        h2: '24px',
+        h3: '18px',
+      },
+      maxWidth: {
+        container: '1200px',
+      },
+      spacing: {
+        container: '24px',
+      },
+    },
+  },
+  plugins: [],
+}

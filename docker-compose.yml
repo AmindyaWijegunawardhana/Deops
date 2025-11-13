@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - SERVER_PORT=5000
+      - JWT_SECRET=your_jwt_secret_key_here
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - happy-tails-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:5000/api
+    networks:
+      - happy-tails-network
+    restart: unless-stopped
+
+networks:
+  happy-tails-network:
+    driver: bridge
