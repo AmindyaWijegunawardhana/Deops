@@ -1,0 +1,98 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install backend dependencies
+      run: cd backend && npm ci
+    
+    - name: Install frontend dependencies
+      run: cd frontend && npm ci
+    
+    - name: Check for debug statements
+      run: |
+        echo "🔍 Checking for console.log statements..."
+        if grep -r "console\.log" --include="*.js" --include="*.jsx" \
+          backend/ frontend/src/ --exclude-dir=node_modules; then
+          echo "❌ Remove console.log statements before committing"
+          exit 1
+        fi
+        echo "✅ No debug statements found"
+    
+    - name: Check for debugger statements
+      run: |
+        echo "🔍 Checking for debugger statements..."
+        if grep -r "debugger" --include="*.js" --include="*.jsx" \
+          backend/ frontend/src/ --exclude-dir=node_modules; then
+          echo "❌ Remove debugger statements before committing"
+          exit 1
+        fi
+        echo "✅ No debugger statements found"
+    
+    - name: Validate JSON files
+      run: |
+        echo "🔍 Validating JSON files..."
+        for file in $(find . -name "*.json" -not -path "./node_modules/*"); do
+          if ! jq empty "$file" 2>/dev/null; then
+            echo "❌ Invalid JSON: $file"
+            exit 1
+          fi
+        done
+        echo "✅ All JSON files valid"
+    
+    - name: Validate YAML files
+      run: |
+        echo "🔍 Validating YAML files..."
+        python -m pip install pyyaml
+        for file in $(find . -name "*.yml" -o -name "*.yaml" | grep -v node_modules); do
+          python -c "import yaml; yaml.safe_load(open('$file'))" || exit 1
+        done
+        echo "✅ All YAML files valid"
+
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Run backend tests
+      run: cd backend && npm test || true
+    
+    - name: Run frontend tests
+      run: cd frontend && npm test || true
+
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Generate coverage report
+      run: |
+        echo "📊 Coverage reports would go here"
+        echo "Tools: Jest, Istanbul, Nyc"

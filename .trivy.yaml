@@ -1,0 +1,23 @@
+# Trivy configuration for security scanning
+severity: HIGH,CRITICAL
+
+# Skip directories
+skip-dirs:
+  - node_modules
+  - .git
+  - .vscode
+  - __pycache__
+  - .pytest_cache
+
+# Output format
+format: json
+output: trivy-results.json
+
+# Exit code: non-zero exit code if vulnerabilities are found with CRITICAL severity
+exit-code: 1
+
+# Ignore unfixed vulnerabilities
+ignore-unfixed: false
+
+# Vuln DB repository
+db-repository: ghcr.io/aquasecurity/trivy-db

@@ -1,0 +1,13 @@
+---
+# Development Inventory (localhost)
+all:
+  vars:
+    ansible_connection: local
+    app_name: happy-tails
+    app_env: development
+    
+  children:
+    local:
+      hosts:
+        localhost:
+          ansible_host: 127.0.0.1

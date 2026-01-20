@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Commit message validation hook
+# Validates commit message format: type(scope): subject
+
+set -e
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Only validate for normal commits (not merge, squash, etc.)
+if [ "$COMMIT_SOURCE" != "" ]; then
+    exit 0
+fi
+
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# Valid commit types
+VALID_TYPES="feat|fix|docs|style|refactor|perf|test|chore|ci|build"
+
+# Pattern: type(scope): subject
+PATTERN="^(${VALID_TYPES})(\(.+\))?: .{1,50}$"
+
+if ! echo "$COMMIT_MSG" | head -1 | grep -qE "$PATTERN"; then
+    echo -e "${RED}❌ Invalid commit message format!${NC}"
+    echo ""
+    echo "Expected format: type(scope): subject"
+    echo "Example: feat(auth): add JWT token validation"
+    echo ""
+    echo "Valid types: $VALID_TYPES"
+    echo "Scope is optional but recommended"
+    echo "Subject must be 1-50 characters"
+    echo ""
+    echo "Your commit message:"
+    echo "$COMMIT_MSG"
+    exit 1
+fi
+
+# Check for minimum length
+if [ ${#COMMIT_MSG} -lt 10 ]; then
+    echo -e "${RED}❌ Commit message too short (minimum 10 characters)${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Commit message format is valid${NC}"
+exit 0

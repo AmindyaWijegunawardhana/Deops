@@ -1,0 +1,71 @@
+---
+# Rollback Playbook
+- name: Rollback Happy Tails Deployment
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  
+  vars:
+    namespace: happy-tails
+    rollback_revisions: 1  # Number of revisions to rollback
+  
+  tasks:
+    - name: Get current deployment revisions
+      shell: "kubectl rollout history deployment/{{ item }} -n {{ namespace }}"
+      loop:
+        - backend
+        - frontend
+      register: revision_info
+      changed_when: false
+    
+    - name: Display current revisions
+      debug:
+        var: revision_info
+    
+    - name: Confirm rollback
+      pause:
+        prompt: |
+          ⚠️  WARNING: You are about to rollback the deployment!
+          
+          Current revisions:
+          {{ revision_info.results | map(attribute='stdout') | join('\n') }}
+          
+          Do you want to proceed? (yes/no)
+      register: rollback_confirm
+      when: not skip_confirmation | default(false)
+    
+    - name: Fail if not confirmed
+      fail:
+        msg: "Rollback cancelled!"
+      when: 
+        - not skip_confirmation | default(false)
+        - rollback_confirm.user_input != 'yes'
+    
+    - name: Rollback backend deployment
+      shell: "kubectl rollout undo deployment/backend -n {{ namespace }} --to-revision={{ rollback_revisions }}"
+      register: backend_rollback
+      changed_when: true
+    
+    - name: Rollback frontend deployment
+      shell: "kubectl rollout undo deployment/frontend -n {{ namespace }} --to-revision={{ rollback_revisions }}"
+      register: frontend_rollback
+      changed_when: true
+    
+    - name: Wait for backend rollback to complete
+      shell: "kubectl rollout status deployment/backend -n {{ namespace }} --timeout=5m"
+      changed_when: false
+    
+    - name: Wait for frontend rollback to complete
+      shell: "kubectl rollout status deployment/frontend -n {{ namespace }} --timeout=5m"
+      changed_when: false
+    
+    - name: Display rollback status
+      debug:
+        msg: |
+          ✅ Rollback completed successfully!
+          
+          Backend: {{ backend_rollback.stdout }}
+          Frontend: {{ frontend_rollback.stdout }}
+    
+    - name: Run health checks post-rollback
+      include_tasks: health-checks.yml

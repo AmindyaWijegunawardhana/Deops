@@ -1,0 +1,55 @@
+---
+# Configure Application Settings
+- name: Configure Happy Tails Application
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  
+  vars:
+    namespace: happy-tails
+    config_version: "{{ ansible_date_time.iso8601 }}"
+  
+  tasks:
+    - name: Update ConfigMaps with new configuration
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: "{{ item.name }}"
+            namespace: "{{ namespace }}"
+            labels:
+              app: "{{ item.app }}"
+          data: "{{ item.data }}"
+      loop:
+        - name: backend-config
+          app: backend
+          data:
+            API_VERSION: "1.0.0"
+            LOG_LEVEL: "info"
+            CORS_ORIGIN: "http://localhost"
+        - name: frontend-config
+          app: frontend
+          data:
+            API_URL: "http://backend:5000/api"
+            APP_VERSION: "1.0.0"
+    
+    - name: Rolling restart of deployments
+      shell: |
+        kubectl rollout restart deployment/backend -n {{ namespace }}
+        kubectl rollout restart deployment/frontend -n {{ namespace }}
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path | default('~/.kube/config') }}"
+    
+    - name: Wait for rollout to complete
+      shell: |
+        kubectl rollout status deployment/backend -n {{ namespace }} --timeout=5m
+        kubectl rollout status deployment/frontend -n {{ namespace }} --timeout=5m
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path | default('~/.kube/config') }}"
+    
+    - name: Display configuration applied
+      debug:
+        msg: "Configuration updated for version {{ config_version }}"

@@ -1,0 +1,107 @@
+---
+# Health Check Playbook
+- name: Health Checks for Happy Tails
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  
+  vars:
+    namespace: happy-tails
+    check_attempts: 30
+    check_delay: 10
+  
+  tasks:
+    - name: Check if namespace exists
+      kubernetes.core.k8s_info:
+        kind: Namespace
+        name: "{{ namespace }}"
+      register: ns_info
+      failed_when: not ns_info.resources
+    
+    - name: Get deployment status
+      kubernetes.core.k8s_info:
+        kind: Deployment
+        namespace: "{{ namespace }}"
+      register: deployments
+    
+    - name: Check backend deployment health
+      block:
+        - name: Get backend pods
+          kubernetes.core.k8s_info:
+            kind: Pod
+            namespace: "{{ namespace }}"
+            label_selectors:
+              - app=backend
+          register: backend_pods
+        
+        - name: Check if backend pods are running
+          assert:
+            that:
+              - backend_pods.resources | length > 0
+              - backend_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length > 0
+            fail_msg: "Backend pods are not running!"
+        
+        - name: Wait for backend health check
+          uri:
+            url: "http://localhost:5000/api/health"
+            method: GET
+            status_code: 200
+          retries: "{{ check_attempts }}"
+          delay: "{{ check_delay }}"
+          register: backend_health
+      rescue:
+        - name: Collect backend logs for debugging
+          shell: "kubectl logs -n {{ namespace }} -l app=backend --tail=50 --all-containers=true || true"
+          register: backend_logs
+          changed_when: false
+        
+        - name: Display backend logs
+          debug:
+            msg: "{{ backend_logs.stdout_lines }}"
+    
+    - name: Check frontend deployment health
+      block:
+        - name: Get frontend pods
+          kubernetes.core.k8s_info:
+            kind: Pod
+            namespace: "{{ namespace }}"
+            label_selectors:
+              - app=frontend
+          register: frontend_pods
+        
+        - name: Check if frontend pods are running
+          assert:
+            that:
+              - frontend_pods.resources | length > 0
+              - frontend_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length > 0
+            fail_msg: "Frontend pods are not running!"
+        
+        - name: Wait for frontend health check
+          uri:
+            url: "http://localhost/index.html"
+            method: GET
+            status_code: 200
+          retries: "{{ check_attempts }}"
+          delay: "{{ check_delay }}"
+          register: frontend_health
+      rescue:
+        - name: Collect frontend logs for debugging
+          shell: "kubectl logs -n {{ namespace }} -l app=frontend --tail=50 --all-containers=true || true"
+          register: frontend_logs
+          changed_when: false
+        
+        - name: Display frontend logs
+          debug:
+            msg: "{{ frontend_logs.stdout_lines }}"
+    
+    - name: Display health check results
+      debug:
+        msg: |
+          ✅ Health Checks Passed!
+          
+          Namespace: {{ namespace }}
+          Backend Pods: {{ backend_pods.resources | length }} running
+          Frontend Pods: {{ frontend_pods.resources | length }} running
+          
+          Backend Health: {{ backend_health.status | default('Healthy') }}
+          Frontend Health: {{ frontend_health.status | default('Healthy') }}

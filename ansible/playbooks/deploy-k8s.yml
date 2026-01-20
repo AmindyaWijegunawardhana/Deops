@@ -1,0 +1,117 @@
+---
+# Deploy to Kubernetes Playbook
+- name: Deploy Happy Tails to Kubernetes
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  
+  vars:
+    namespace: happy-tails
+    app_name: happy-tails
+    image_backend: "happy-tails-backend:{{ build_number | default('latest') }}"
+    image_frontend: "happy-tails-frontend:{{ build_number | default('latest') }}"
+    replicas: 3
+  
+  tasks:
+    - name: Create namespace
+      kubernetes.core.k8s:
+        name: "{{ namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+    
+    - name: Create ConfigMaps
+      kubernetes.core.k8s:
+        name: "{{ item.name }}"
+        namespace: "{{ namespace }}"
+        api_version: v1
+        kind: ConfigMap
+        state: present
+        definition: "{{ lookup('template', item.template) }}"
+      loop:
+        - name: backend-config
+          template: backend-configmap.j2
+        - name: frontend-config
+          template: frontend-configmap.j2
+    
+    - name: Create Secrets
+      kubernetes.core.k8s:
+        name: "{{ item.name }}"
+        namespace: "{{ namespace }}"
+        api_version: v1
+        kind: Secret
+        state: present
+        definition: "{{ lookup('template', item.template) }}"
+      loop:
+        - name: backend-secrets
+          template: backend-secrets.j2
+        - name: db-secrets
+          template: db-secrets.j2
+    
+    - name: Deploy Backend
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', 'backend-deployment.j2') }}"
+      vars:
+        replicas: "{{ backend_replicas | default(3) }}"
+    
+    - name: Deploy Frontend
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', 'frontend-deployment.j2') }}"
+      vars:
+        replicas: "{{ frontend_replicas | default(3) }}"
+    
+    - name: Create Services
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', item.template) }}"
+      loop:
+        - template: backend-service.j2
+        - template: frontend-service.j2
+    
+    - name: Create Ingress
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', 'ingress.j2') }}"
+    
+    - name: Create Network Policies
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', 'network-policy.j2') }}"
+    
+    - name: Create HPA (Horizontal Pod Autoscaler)
+      kubernetes.core.k8s:
+        namespace: "{{ namespace }}"
+        state: present
+        definition: "{{ lookup('template', 'hpa.j2') }}"
+    
+    - name: Wait for deployment to be ready
+      kubernetes.core.k8s_info:
+        kind: Deployment
+        namespace: "{{ namespace }}"
+        wait: yes
+        wait_condition:
+          type: Available
+          status: "True"
+        wait_timeout: 300
+      register: deployment_status
+    
+    - name: Get deployment status
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: "{{ namespace }}"
+      register: pods
+    
+    - name: Display deployment information
+      debug:
+        msg: |
+          Deployment completed!
+          Namespace: {{ namespace }}
+          Pods running: {{ pods.resources | length }}
+          Pod details: {{ pods.resources | map(attribute='metadata.name') | list }}
