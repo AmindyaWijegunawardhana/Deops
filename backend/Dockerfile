@@ -1,6 +1,4 @@
-# Multi-stage build for production
-
-# Stage 1: Build the React application
+# Backend Dockerfile
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -11,42 +9,35 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy source code
+# Copy server code
 COPY . .
 
-# Build the React app for production
-RUN npm run build
+# Production stage
+FROM node:18-alpine
 
-# Stage 2: Serve with Nginx
-FROM nginx:alpine
+WORKDIR /app
 
 # Install dumb-init
 RUN apk add --no-cache dumb-init
 
-# Create non-root user
-RUN addgroup -g 101 -S nginx && adduser -S nginx -u 101
+# Copy node_modules and app from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app .
 
-# Copy Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Create a non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN chown -R nodejs:nodejs /app
 
-# Copy built app from builder stage to Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+USER nodejs
 
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
+ENV NODE_ENV=production
+ENV PORT=5000
 
-# Create directories for Nginx with proper permissions
-RUN mkdir -p /var/run/nginx && chown -R nginx:nginx /var/run/nginx
-
-USER nginx
-
-# Expose port 80
-EXPOSE 80
+EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/index.html || exit 1
+    CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
 
-# Start Nginx with dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server.js"]

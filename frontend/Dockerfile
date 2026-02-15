@@ -1,6 +1,4 @@
-# Multi-stage build for production
-
-# Stage 1: Build the React application
+# Build stage
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -8,45 +6,41 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (only required)
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the React app for production
+# Build the app
 RUN npm run build
 
-# Stage 2: Serve with Nginx
+# Production stage
 FROM nginx:alpine
 
 # Install dumb-init
 RUN apk add --no-cache dumb-init
 
-# Create non-root user
-RUN addgroup -g 101 -S nginx && adduser -S nginx -u 101
+# Use a non-root user (nginx user already exists in alphine nginx image)
+# We need to make sure the user has permissions to write to required directories
+RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
 
-# Copy Nginx configuration
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built app from builder stage to Nginx
+# Copy build artifacts from build stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
-
-# Create directories for Nginx with proper permissions
-RUN mkdir -p /var/run/nginx && chown -R nginx:nginx /var/run/nginx
+# Set permissions for nginx user
+RUN touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid /usr/share/nginx/html
 
 USER nginx
 
-# Expose port 80
-EXPOSE 80
+EXPOSE 8080
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/index.html || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
-# Start Nginx with dumb-init
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["nginx", "-g", "daemon off;"]

@@ -12,7 +12,7 @@ yarn-error.log
 coverage
 .npm
 .nyc_output
-package-lock.json
+
 yarn.lock
 .swp
 .swo
