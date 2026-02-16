@@ -116,9 +116,9 @@ const server = app.listen(PORT, () => {
   console.log('\n' + '='.repeat(60));
   console.log('🚀 HAPPY TAILS SERVER');
   console.log('='.repeat(60));
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`📍 API: http://localhost:${PORT}/api`);
-  console.log(`💚 Health: http://localhost:${PORT}/api/health`);
+  console.log(`✅ Server running on http://13.53.137.119:${PORT}`);
+  console.log(`📍 API: http://13.53.137.119:${PORT}/api`);
+  console.log(`💚 Health: http://13.53.137.119:${PORT}/api/health`);
   console.log('='.repeat(60) + '\n');
 });
 

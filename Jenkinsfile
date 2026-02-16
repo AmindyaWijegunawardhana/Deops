@@ -118,7 +118,7 @@ pipeline {
                     sh '''
                     echo "Checking Backend Health..."
                     for i in {1..30}; do
-                        if docker exec happy-tails-backend node -e "require('http').get('http://localhost:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" 2>/dev/null; then
+                        if docker exec happy-tails-backend node -e "require('http').get('http://13.53.137.119:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" 2>/dev/null; then
                             echo "✅ Backend is healthy"
                             break
                         fi
@@ -132,7 +132,7 @@ pipeline {
                     
                     echo "Checking Frontend Health..."
                     for i in {1..30}; do
-                        if docker exec happy-tails-frontend wget --quiet --tries=1 --spider http://localhost/index.html 2>/dev/null; then
+                        if docker exec happy-tails-frontend wget --quiet --tries=1 --spider http://13.53.137.119/index.html 2>/dev/null; then
                             echo "✅ Frontend is healthy"
                             break
                         fi
@@ -182,8 +182,8 @@ pipeline {
                 Frontend Image: ${IMAGE_FRONTEND}
                 
                 Services are running on:
-                - Frontend: http://localhost:80
-                - Backend API: http://localhost:5000/api
+                - Frontend: http://13.53.137.119:80
+                - Backend API: http://13.53.137.119:5000/api
                 =================================================
                 '''
             }

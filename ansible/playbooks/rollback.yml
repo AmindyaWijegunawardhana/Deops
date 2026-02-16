@@ -1,7 +1,7 @@
 ---
 # Rollback Playbook
 - name: Rollback Happy Tails Deployment
-  hosts: localhost
+  hosts: 13.53.137.119
   connection: local
   gather_facts: no
   

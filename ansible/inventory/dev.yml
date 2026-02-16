@@ -1,5 +1,5 @@
 ---
-# Development Inventory (localhost)
+# Development Inventory (13.53.137.119)
 all:
   vars:
     ansible_connection: local
@@ -9,5 +9,5 @@ all:
   children:
     local:
       hosts:
-        localhost:
+        13.53.137.119:
           ansible_host: 127.0.0.1

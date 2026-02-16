@@ -257,11 +257,11 @@ kubectl describe pod <pod-name> -n happy-tails
 
 # Test backend health
 kubectl port-forward svc/backend 5000:5000 -n happy-tails &
-curl http://localhost:5000/api/health
+curl http://13.53.137.119:5000/api/health
 
 # Test frontend
 kubectl port-forward svc/frontend 8080:80 -n happy-tails &
-curl http://localhost:8080
+curl http://13.53.137.119:8080
 ```
 
 ### 10.2 Connectivity Tests

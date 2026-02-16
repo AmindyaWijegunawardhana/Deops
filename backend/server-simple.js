@@ -9,7 +9,7 @@ const PORT = process.env.SERVER_PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+  origin: ['http://13.53.137.119:5173', 'http://13.53.137.119:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
   credentials: true
 }));
 app.use(express.json());
@@ -133,10 +133,10 @@ app.listen(PORT, () => {
   console.log('\n' + '='.repeat(60));
   console.log('🚀 HAPPY TAILS SERVER');
   console.log('='.repeat(60));
-  console.log(`✓ Server is running on http://localhost:${PORT}`);
-  console.log(`✓ CORS enabled for http://localhost:5173`);
-  console.log(`✓ API base URL: http://localhost:${PORT}/api`);
-  console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
+  console.log(`✓ Server is running on http://13.53.137.119:${PORT}`);
+  console.log(`✓ CORS enabled for http://13.53.137.119:5173`);
+  console.log(`✓ API base URL: http://13.53.137.119:${PORT}/api`);
+  console.log(`✓ Health check: http://13.53.137.119:${PORT}/api/health`);
   console.log('\n📝 MODE: In-memory storage (no database)');
   console.log('   Data will be lost when server restarts');
   console.log('   To use MySQL, update .env and restart\n');

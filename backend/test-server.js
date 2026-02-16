@@ -43,5 +43,5 @@ app.post('/api/auth/login', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log('\n✅ Server is listening on 0.0.0.0:' + PORT);
-  console.log('📍 Test: http://localhost:' + PORT + '/api/health\n');
+  console.log('📍 Test: http://13.53.137.119:' + PORT + '/api/health\n');
 });

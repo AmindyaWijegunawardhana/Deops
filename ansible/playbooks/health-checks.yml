@@ -1,7 +1,7 @@
 ---
 # Health Check Playbook
 - name: Health Checks for Happy Tails
-  hosts: localhost
+  hosts: 13.53.137.119
   connection: local
   gather_facts: no
   
@@ -43,7 +43,7 @@
         
         - name: Wait for backend health check
           uri:
-            url: "http://localhost:5000/api/health"
+            url: "http://13.53.137.119:5000/api/health"
             method: GET
             status_code: 200
           retries: "{{ check_attempts }}"
@@ -78,7 +78,7 @@
         
         - name: Wait for frontend health check
           uri:
-            url: "http://localhost/index.html"
+            url: "http://13.53.137.119/index.html"
             method: GET
             status_code: 200
           retries: "{{ check_attempts }}"
