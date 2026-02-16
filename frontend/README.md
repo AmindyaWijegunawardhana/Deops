@@ -40,7 +40,7 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and visit `http://13.53.137.119:5173`
+4. Open your browser and visit `http://51.20.78.235:5173`
 
 ## Available Scripts
 

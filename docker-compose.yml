@@ -16,7 +16,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: [ "CMD", "node", "-e", "require('http').get('http://13.53.137.119:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" ]
+      test: [ "CMD", "node", "-e", "require('http').get('http://51.20.78.235:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" ]
       interval: 30s
       timeout: 10s
       retries: 3

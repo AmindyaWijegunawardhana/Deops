@@ -33,6 +33,6 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://13.53.137.119:${PORT}`);
-  console.log(`📍 Try: http://13.53.137.119:${PORT}/api/health`);
+  console.log(`✅ Server running on http://51.20.78.235:${PORT}`);
+  console.log(`📍 Try: http://51.20.78.235:${PORT}/api/health`);
 });

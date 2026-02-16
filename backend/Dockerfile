@@ -37,7 +37,7 @@ EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://13.53.137.119:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
+    CMD node -e "require('http').get('http://51.20.78.235:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]

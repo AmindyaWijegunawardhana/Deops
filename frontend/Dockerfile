@@ -40,7 +40,7 @@ USER nginx
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://13.53.137.119:8080/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://51.20.78.235:8080/health || exit 1
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["nginx", "-g", "daemon off;"]

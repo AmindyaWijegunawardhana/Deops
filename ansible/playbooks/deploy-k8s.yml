@@ -1,7 +1,7 @@
 ---
 # Deploy to Kubernetes Playbook
 - name: Deploy Happy Tails to Kubernetes
-  hosts: 13.53.137.119
+  hosts: 51.20.78.235
   connection: local
   gather_facts: yes
   

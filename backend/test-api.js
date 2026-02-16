@@ -5,7 +5,7 @@
  * Tests the API endpoints directly
  */
 
-const BASE_URL = 'http://13.53.137.119:5000/api';
+const BASE_URL = 'http://51.20.78.235:5000/api';
 
 async function test() {
   console.log('\n🧪 Testing Happy Tails API\n');
