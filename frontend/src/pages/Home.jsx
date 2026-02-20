@@ -29,7 +29,7 @@ function Home() {
       <section className="bg-gradient-to-r from-primary to-primary-700 text-white py-6">
         <div className="max-w-container mx-auto px-container text-center">
           <h1 className="text-2xl font-heading font-bold mb-2">
-            Adopt a Street Pet
+            Amindya Nimeshani 
           </h1>
           <p className="text-sm text-white">
             Free adoption • Save a life • Find a loyal companion
